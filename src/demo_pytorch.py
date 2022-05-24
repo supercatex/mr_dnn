@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     # PyTorch
     torch_home = "/home/pcms/models/torch/"
-    dnn_objs = FasterRCNN(torch_home)
+    ddn_rcnn = FasterRCNN(torch_home)
     dnn_yolo = Yolov5(torch_home)
 
     # MAIN LOOP
@@ -31,10 +31,10 @@ if __name__ == "__main__":
         frame = _frame.copy()
 
         # Torch
-        boxes = dnn_objs.forward(frame)
+        boxes = ddn_rcnn.forward(frame)
         for id, index, conf, x1, y1, x2, y2 in boxes:
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            cv2.putText(frame, str(index), (x1 + 5, y1 + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(frame, ddn_rcnn.labels[index], (x1 + 5, y1 + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         
         boxes = dnn_yolo.forward(frame)
         for id, index, conf, x1, y1, x2, y2 in boxes:
