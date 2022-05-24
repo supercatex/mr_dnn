@@ -62,7 +62,7 @@ class FasterRCNN(TorchModel):
 class Yolov5(TorchModel):
     def __init__(self, torch_home) -> None:
         super().__init__(torch_home)
-        self.net = torch.hub.load("ultralytics/yolov5", "yolov5m", device="cpu")
+        self.net = torch.hub.load("ultralytics/yolov5", "yolov5s", device="cpu")
         self.net.eval().to(self.device)
         self.labels = self.net.names
 
