@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-from operator import mod
-
-from sklearn.metrics import SCORERS
 import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
@@ -33,9 +30,10 @@ if __name__ == "__main__":
     rospy.sleep(1)
     while not rospy.is_shutdown():
         rospy.Rate(20).sleep()
+        frame = _frame.copy()
+        canvas = _frame.copy()
 
         # OpenVINO
-        frame = _frame.copy()
         boxes = dnn_face.forward(frame)
         for x1, y1, x2, y2 in boxes:
             face = frame[y1:y2, x1:x2, :]
@@ -44,21 +42,20 @@ if __name__ == "__main__":
 
             gender = dnn_age_gender.genders_label[gender]
             emotion = dnn_emotions.emotions_label[emotion]
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            cv2.putText(frame, "Age: %d" % age, (x1 + 5, y1 + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            cv2.putText(frame, gender, (x1 + 5, y1 + 35), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            cv2.putText(frame, emotion, (x1 + 5, y1 + 55), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.rectangle(canvas, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.putText(canvas, "Age: %d" % age, (x1 + 5, y1 + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(canvas, gender, (x1 + 5, y1 + 35), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(canvas, emotion, (x1 + 5, y1 + 55), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         
         poses = dnn_human_pose.forward(frame)
-        frame = dnn_human_pose.draw_poses(frame, poses, 0.1)
+        canvas = dnn_human_pose.draw_poses(canvas, poses, 0.1)
         for pose in poses:
             for i, p in enumerate(pose):
-                if i != 11: continue
                 x, y, c = map(int, p)
-                cv2.circle(frame, (x, y), 5, (0, 0, 255), -1)
+                cv2.circle(canvas, (x, y), 5, (0, 0, 255), -1)
 
         # show image
-        cv2.imshow("frame", frame)
+        cv2.imshow("frame", canvas)
         key_code = cv2.waitKey(1)
         if key_code in [27, ord('q')]:
             break

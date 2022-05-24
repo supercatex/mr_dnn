@@ -199,9 +199,12 @@ class HumanPoseEstimation(IntelPreTrainedModel):
 class PersonAttributesRecognition(IntelPreTrainedModel):
     def __init__(self, models_dir: str) -> None:
         super().__init__(models_dir, "person-attributes-recognition-crossroad-0230")
-        print(self.net.outputs)
 
     def forward(self, frame):
-        pass
-
-PersonAttributesRecognition("/home/pcms/models/")
+        # (B, C, H, W) => (1, 3, 160, 80) BGR
+        img = frame.copy()
+        img = cv2.resize(img, (80, 160))
+        img = np.expand_dims(img.transpose(2, 0, 1), 0)
+        out = super().forward(img)
+        attrs = out[self.net.output("453")]
+        print(attrs)
