@@ -23,18 +23,21 @@ if __name__ == "__main__":
     # PyTorch
     torch_home = "/home/pcms/models/torch/"
     dnn_objs = FasterRCNN(torch_home)
+    dnn_poses = KeypointRCNN(torch_home)
 
     # MAIN LOOP
     while not rospy.is_shutdown():
         rospy.Rate(20).sleep()
+        frame = _frame.copy()
 
         # Torch
-        frame = _frame.copy()
-        boxes = dnn_objs.forward(frame)
-        for id, label, conf, x1, y1, x2, y2 in boxes:
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            cv2.putText(frame, str(label), (x1 + 5, y1 + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+        # boxes = dnn_objs.forward(frame)
+        # for id, label, conf, x1, y1, x2, y2 in boxes:
+        #     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        #     cv2.putText(frame, str(label), (x1 + 5, y1 + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         
+        poses = dnn_poses.forward(frame)
+
         # show image
         cv2.imshow("frame", frame)
         key_code = cv2.waitKey(1)
