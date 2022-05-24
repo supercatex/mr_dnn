@@ -207,4 +207,17 @@ class PersonAttributesRecognition(IntelPreTrainedModel):
         img = np.expand_dims(img.transpose(2, 0, 1), 0)
         out = super().forward(img)
         attrs = out[self.net.output("453")]
-        print(attrs)
+        top_colors = out[self.net.output("456")]
+        bottom_colors = out[self.net.output("459")]
+        print(attrs.shape)
+        res = {
+            "is_male"           : attrs[0][0][0][0] >= 0.5,
+            "has_bag"           : attrs[0][1][0][0] >= 0.5,
+            "has_backpack"      : attrs[0][2][0][0] >= 0.5,
+            "has_hat"           : attrs[0][3][0][0] >= 0.5,
+            "has_longsleeves"   : attrs[0][4][0][0] >= 0.5,
+            "has_longpants"     : attrs[0][5][0][0] >= 0.5,
+            "has_longhair"      : attrs[0][6][0][0] >= 0.5,
+            "has_coat_jacket"   : attrs[0][7][0][0] >= 0.5
+        }
+        return res
