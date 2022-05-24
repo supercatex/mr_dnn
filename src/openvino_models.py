@@ -194,3 +194,14 @@ class HumanPoseEstimation(IntelPreTrainedModel):
                     cv2.line(img_limbs, tuple(points[i]), tuple(points[j]), color=cls.colors[j], thickness=4)
         cv2.addWeighted(img, 0.4, img_limbs, 0.6, 0, dst=img)
         return img
+
+
+class PersonAttributesRecognition(IntelPreTrainedModel):
+    def __init__(self, models_dir: str) -> None:
+        super().__init__(models_dir, "person-attributes-recognition-crossroad-0230")
+        print(self.net.outputs)
+
+    def forward(self, frame):
+        pass
+
+PersonAttributesRecognition("/home/pcms/models/")
