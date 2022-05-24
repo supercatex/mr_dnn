@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from operator import mod
 import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
@@ -24,6 +25,7 @@ if __name__ == "__main__":
     dnn_face = FaceDetection(models_dir)
     dnn_age_gender = AgeGenderRecognition(models_dir)
     dnn_emotions = EmotionsRecognition(models_dir)
+    dnn_human_pose = HumanPoseEstimation(models_dir)
 
     # MAIN LOOP
     rospy.sleep(1)
@@ -45,6 +47,10 @@ if __name__ == "__main__":
             cv2.putText(frame, gender, (x1 + 5, y1 + 35), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             cv2.putText(frame, emotion, (x1 + 5, y1 + 55), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         
+        out = dnn_human_pose.forward(frame)
+        for x, y in out:
+            cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
+
         # show image
         cv2.imshow("frame", frame)
         key_code = cv2.waitKey(1)

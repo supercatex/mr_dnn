@@ -82,3 +82,48 @@ class EmotionsRecognition(IntelPreTrainedModel):
         # (1, 5, 1, 1) [0 - neutral, 1 - happy, 2 - sad, 3 - surprise, 4 - anger]
         out = out[self.output_layers[0]][0]
         return np.argmax(out)
+
+
+class HumanPoseEstimation(IntelPreTrainedModel):
+    default_skeleton = (
+        (15, 13), (13, 11), (16, 14), 
+        (14, 12), (11, 12), (5, 11), 
+        (6, 12), (5, 6), (5, 7), 
+        (6, 8), (7, 9), (8, 10), 
+        (1, 2), (0, 1), (0, 2), 
+        (1, 3), (2, 4), (3, 5), (4, 6))
+
+    colors = (
+        (255, 0, 0), (255, 0, 255), (170, 0, 255), (255, 0, 85),
+        (255, 0, 170), (85, 255, 0), (255, 170, 0), (0, 255, 0),
+        (255, 255, 0), (0, 255, 85), (170, 255, 0), (0, 85, 255),
+        (0, 255, 170), (0, 0, 255), (0, 255, 255), (85, 0, 255),
+        (0, 170, 255))
+
+    def __init__(self, models_dir: str) -> None:
+        super().__init__(models_dir, "human-pose-estimation-0001")
+    
+    def forward(self, frame):
+        # (B, C, H, W) => (1, 3, 256, 456) BGR
+        img = frame.copy()
+        h, w, c = img.shape
+        img = cv2.resize(img, (456, 256))
+        img = np.expand_dims(img.transpose(2, 0, 1), 0)
+        out = super().forward(img)
+
+        points = out[self.output_layers[0]][0]
+        heatmaps = out[self.output_layers[1]][0]
+        print(points.shape, heatmaps.shape)
+        poses = []
+        for i in range(18):
+            p = points[i]
+            ph, pw = p.shape
+            max_v = np.max(p)
+            if max_v < 0.4:
+                poses.append([0, 0])
+                continue
+            max_i = np.argmax(p)
+            max_y = int(max_i // pw * (h / ph))
+            max_x = int(max_i % pw * (w / pw))
+            poses.append([max_x, max_y])
+        return poses
