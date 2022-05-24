@@ -43,17 +43,21 @@ class FasterRCNN(TorchModel):
         return res
 
 
-class KeypointRCNN(TorchModel):
+class Yolov5(TorchModel):
     def __init__(self, torch_home) -> None:
         super().__init__(torch_home)
-        self.net = keypointrcnn_resnet50_fpn(pretrained=True)
+        self.net = torch.hub.load("ultralytics/yolov5", "yolov5m", device="cpu")
         self.net.eval().to(self.device)
+        self.labels = self.net.names
 
     def forward(self, frame):
-        img = self.BGR2Tensor(frame)
+        img = frame.copy()
         out = self.net(img)
-        keypoints = out[0]["keypoints"]
-        keypoints_scores = out[0]["keypoints_scores"]
-        scores = out[0]["scores"]
-        print(keypoints.shape, keypoints_scores.shape, scores.shape)
-        return out
+
+        res = []
+        for x1, y1, x2, y2, pred, index in out.xyxy[0]:
+            if pred < 0.7: continue
+            x1, y1, x2, y2, index = map(int, (x1, y1, x2, y2, index))
+            res.append([0, index, pred, x1, y1, x2, y2])
+        return res
+        

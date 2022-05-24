@@ -132,3 +132,6 @@ dmypy.json
 .vscode/browse.vc.db-wal
 .vscode/c_cpp_properties.json
 .vscode/settings.json
+yolov5l.pt
+yolov5m.pt
+yolov5s.pt

@@ -23,7 +23,7 @@ if __name__ == "__main__":
     # PyTorch
     torch_home = "/home/pcms/models/torch/"
     dnn_objs = FasterRCNN(torch_home)
-    dnn_poses = KeypointRCNN(torch_home)
+    dnn_yolo = Yolov5(torch_home)
 
     # MAIN LOOP
     while not rospy.is_shutdown():
@@ -31,12 +31,15 @@ if __name__ == "__main__":
         frame = _frame.copy()
 
         # Torch
-        # boxes = dnn_objs.forward(frame)
-        # for id, label, conf, x1, y1, x2, y2 in boxes:
-        #     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        #     cv2.putText(frame, str(label), (x1 + 5, y1 + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+        boxes = dnn_objs.forward(frame)
+        for id, index, conf, x1, y1, x2, y2 in boxes:
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.putText(frame, str(index), (x1 + 5, y1 + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         
-        poses = dnn_poses.forward(frame)
+        boxes = dnn_yolo.forward(frame)
+        for id, index, conf, x1, y1, x2, y2 in boxes:
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            cv2.putText(frame, dnn_yolo.labels[index], (x1 + 5, y1 + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
         # show image
         cv2.imshow("frame", frame)
