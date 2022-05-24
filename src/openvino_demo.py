@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 from operator import mod
+
+from sklearn.metrics import SCORERS
 import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
@@ -47,9 +49,9 @@ if __name__ == "__main__":
             cv2.putText(frame, gender, (x1 + 5, y1 + 35), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             cv2.putText(frame, emotion, (x1 + 5, y1 + 55), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         
-        out = dnn_human_pose.forward(frame)
-        for x, y in out:
-            cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
+        poses, scores = dnn_human_pose.forward(frame)
+        frame = dnn_human_pose.draw_poses(frame, poses, 0.1)
+        print(poses.shape, scores.shape)
 
         # show image
         cv2.imshow("frame", frame)
