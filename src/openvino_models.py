@@ -83,6 +83,17 @@ class EmotionsRecognition(IntelPreTrainedModel):
 
 
 class HumanPoseEstimation(IntelPreTrainedModel):
+    points_name = {
+        0: "NOSE",
+        1: "EYE_L",         2: "EYE_R",
+        3: "EAR_L",         4: "EAR_R",
+        5: "SHOULDER_L",    6: "SHOULDER_R",
+        7: "ELBOW_L",       8: "ELBOW_R",
+        9: "WRIST_L",       10:"WRIST_R",
+        11:"HIP_L",         12:"HIP_R",
+        13:"KNEE_L",        14:"KNEE_R",
+        15:"ANKLE_L",       16:"ANKLE_R"
+    }
     colors = (
         (255, 0, 0), (255, 0, 255), (170, 0, 255), (255, 0, 85), 
         (255, 0, 170), (85, 255, 0), (255, 170, 0), (0, 255, 0), 
@@ -105,10 +116,10 @@ class HumanPoseEstimation(IntelPreTrainedModel):
         img = cv2.resize(img, (456, 256))
         img = np.expand_dims(img.transpose(2, 0, 1), 0)
         out = super().forward(img)
-        pafs = out[self.net.output("Mconv_stage2_L1")]
-        heatmaps = out[self.net.output("Mconv_stage2_L2")]
+        pafs = out[self.net.output("Mconv7_stage2_L1")]
+        heatmaps = out[self.net.output("Mconv7_stage2_L2")]
         poses, scores = self.process_results(frame, pafs, heatmaps)
-        return poses, scores
+        return poses
 
     # 2d pooling in numpy (from: htt11ps://stackoverflow.com/a/54966908/1624463)
     def pool2d(cls, A, kernel_size, stride, padding, pool_mode="max"):

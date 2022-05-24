@@ -49,9 +49,13 @@ if __name__ == "__main__":
             cv2.putText(frame, gender, (x1 + 5, y1 + 35), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             cv2.putText(frame, emotion, (x1 + 5, y1 + 55), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         
-        poses, scores = dnn_human_pose.forward(frame)
+        poses = dnn_human_pose.forward(frame)
         frame = dnn_human_pose.draw_poses(frame, poses, 0.1)
-        print(poses.shape, scores.shape)
+        for pose in poses:
+            for i, p in enumerate(pose):
+                if i != 11: continue
+                x, y, c = map(int, p)
+                cv2.circle(frame, (x, y), 5, (0, 0, 255), -1)
 
         # show image
         cv2.imshow("frame", frame)
