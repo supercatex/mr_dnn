@@ -20,7 +20,7 @@ if __name__ == "__main__":
     _frame = rospy.wait_for_message("/camera/rgb/image_raw", Image)
 
     # OpenVINO
-    models_dir = "/home/pcms/models/"
+    models_dir = "/home/pcms/models/openvino/"
     dnn_face = FaceDetection(models_dir)
     dnn_age_gender = AgeGenderRecognition(models_dir)
     dnn_emotions = EmotionsRecognition(models_dir)

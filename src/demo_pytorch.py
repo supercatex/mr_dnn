@@ -21,7 +21,7 @@ if __name__ == "__main__":
     _frame = rospy.wait_for_message("/camera/rgb/image_raw", Image)
 
     # PyTorch
-    torch_home = "/home/pcms/models/torch/"
+    torch_home = "/home/pcms/models/pytorch/"
     ddn_rcnn = FasterRCNN(torch_home)
     dnn_yolo = Yolov5(torch_home)
 
