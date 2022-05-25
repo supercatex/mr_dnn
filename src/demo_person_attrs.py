@@ -25,7 +25,7 @@ if __name__ == "__main__":
     dnn_yolo = Yolov5(torch_home)
 
     # OpenVINO
-    models_dir = "/home/pcms/models/"
+    models_dir = "/home/pcms/models/openvino/"
     dnn_attrs = PersonAttributesRecognition(models_dir)
 
     # MAIN LOOP
@@ -44,6 +44,10 @@ if __name__ == "__main__":
             attrs = dnn_attrs.forward(person)
             print(attrs)
             cv2.rectangle(canvas, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            i = 0
+            for k, v in attrs.items():
+                cv2.putText(canvas, "%s: %d" % (k, v), (x1 + 5, y1 + 15 + i * 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 125), 2)
+                i = i + 1
 
         # show image
         cv2.imshow("frame", canvas)
