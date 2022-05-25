@@ -9,10 +9,10 @@ from scipy.spatial import distance
 
 
 class IntelPreTrainedModel(object):
-    def __init__(self, models_dir: str, model_name: str) -> None:
+    def __init__(self, models_dir: str, model_group: str, model_name: str) -> None:
         ie = Core()
         name = model_name
-        path = "%s/intel/%s/FP16/%s.xml" % (models_dir, name, name)
+        path = "%s/%s/%s/FP16/%s.xml" % (models_dir, model_group, name, name)
         net = ie.read_model(model=path)
         self.net = ie.compile_model(model=net, device_name="CPU")
     
@@ -22,7 +22,7 @@ class IntelPreTrainedModel(object):
 
 class FaceDetection(IntelPreTrainedModel):
     def __init__(self, models_dir: str) -> None:
-        super().__init__(models_dir, "face-detection-adas-0001")
+        super().__init__(models_dir, "intel", "face-detection-adas-0001")
 
     def forward(self, frame): 
         # (B, C, H, W) => (1, 3, 384, 672) RGB
@@ -50,7 +50,7 @@ class FaceDetection(IntelPreTrainedModel):
 
 class AgeGenderRecognition(IntelPreTrainedModel):
     def __init__(self, models_dir: str) -> None:
-        super().__init__(models_dir, "age-gender-recognition-retail-0013")
+        super().__init__(models_dir, "intel", "age-gender-recognition-retail-0013")
         self.genders_label = ("female", "male")
 
     def forward(self, frame): 
@@ -69,7 +69,7 @@ class AgeGenderRecognition(IntelPreTrainedModel):
 
 class EmotionsRecognition(IntelPreTrainedModel):
     def __init__(self, models_dir: str) -> None:
-        super().__init__(models_dir, "emotions-recognition-retail-0003")
+        super().__init__(models_dir, "intel", "emotions-recognition-retail-0003")
         self.emotions_label = ("neutral", "happy", "sad", "surprise", "anger")
 
     def forward(self, frame):
@@ -108,7 +108,7 @@ class HumanPoseEstimation(IntelPreTrainedModel):
         (8, 10), (1, 2), (0, 1), (0, 2), (1, 3), (2, 4), (3, 5), (4, 6))
 
     def __init__(self, models_dir: str) -> None:
-        super().__init__(models_dir, "human-pose-estimation-0001")
+        super().__init__(models_dir, "intel", "human-pose-estimation-0001")
         self.decoder = OpenPoseDecoder()
     
     def forward(self, frame):
@@ -200,7 +200,7 @@ class HumanPoseEstimation(IntelPreTrainedModel):
 
 class PersonAttributesRecognition(IntelPreTrainedModel):
     def __init__(self, models_dir: str) -> None:
-        super().__init__(models_dir, "person-attributes-recognition-crossroad-0230")
+        super().__init__(models_dir, "intel", "person-attributes-recognition-crossroad-0230")
 
     def forward(self, frame):
         # (B, C, H, W) => (1, 3, 160, 80) BGR
@@ -266,7 +266,7 @@ class ActionRecognitionDecoder(IntelPreTrainedModel):
 
 class FaceReidentification(IntelPreTrainedModel):
     def __init__(self, models_dir: str,) -> None:
-        super().__init__(models_dir, "face-reidentification-retail-0095")
+        super().__init__(models_dir, "intel", "face-reidentification-retail-0095")
 
     def forward(self, frame):
         # (B, C, H, W) => (1, 3, 128, 128) BGR

@@ -26,7 +26,7 @@ if __name__ == "__main__":
     dnn_emotions = EmotionsRecognition(models_dir)
     dnn_human_pose = HumanPoseEstimation(models_dir)
     dnn_face_reid = FaceReidentification(models_dir)
-    Kinda = np.loadtxt("Kinda.csv", delimiter=",")
+    Kinda = np.loadtxt("Kinda.csv")
 
     # MAIN LOOP
     rospy.sleep(1)
