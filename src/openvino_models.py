@@ -257,5 +257,8 @@ class ActionRecognitionDecoder(IntelPreTrainedModel):
         out = super().forward(embeddings)[self.net.output("674")]
         # (1, 400)
         indices = np.argsort(out[0])[::-1][:5]
-        return indices
+        res = []
+        for index in indices:
+            res.append([index, out[0][index]])
+        return res
         

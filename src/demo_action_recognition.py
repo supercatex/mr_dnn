@@ -41,8 +41,8 @@ if __name__ == "__main__":
         while len(embeddings) > 16: embeddings.pop(0)
         if len(embeddings) == 16:
             out = dnn_action_decoder.forward(embeddings)
-            for i, index in enumerate(out, 1):
-                cv2.putText(canvas, action_classes[index], (5, 25 * i), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 0, 0), 2)
+            for i, (index, value) in enumerate(out, 1):
+                cv2.putText(canvas, "%.2f %s" % (value, action_classes[index]), (5, 25 * i), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 0, 0), 2)
 
         # show image
         cv2.imshow("frame", canvas)
