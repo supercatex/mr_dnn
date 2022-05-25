@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 from openvino.runtime import Core
+from torch import embedding
 from openpose_decoder import OpenPoseDecoder
 
 
@@ -221,3 +222,39 @@ class PersonAttributesRecognition(IntelPreTrainedModel):
             "has_coat_jacket"   : attrs[0][7][0][0] >= 0.5
         }
         return res
+
+
+class ActionRecognitionEncoder(IntelPreTrainedModel):
+    def __init__(self, models_dir: str) -> None:
+        ie = Core()
+        name = "action-recognition-0001"
+        path = "%s/intel/%s/%s-encoder/FP16/%s-encoder.xml" % (models_dir, name, name, name)
+        net = ie.read_model(model=path)
+        self.net = ie.compile_model(model=net, device_name="CPU")
+    
+    def forward(self, frame):
+        # (B, C, H, W) => (1, 3, 224, 224) BGR
+        img = frame.copy()
+        img = cv2.resize(img, (224, 224))
+        img = np.expand_dims(img.transpose(2, 0, 1), 0)
+        out = super().forward(img)[self.net.output("371")]
+        # (1, 512, 1, 1)
+        embedding = np.reshape(out, (512))
+        return embedding
+
+
+class ActionRecognitionDecoder(IntelPreTrainedModel):
+    def __init__(self, models_dir: str) -> None:
+        ie = Core()
+        name = "action-recognition-0001"
+        path = "%s/intel/%s/%s-decoder/FP16/%s-decoder.xml" % (models_dir, name, name, name)
+        net = ie.read_model(model=path)
+        self.net = ie.compile_model(model=net, device_name="CPU")
+    
+    def forward(self, embeddings):
+        # (B, T, C) => (1, 16, 512)
+        embeddings = np.expand_dims(embeddings, 0)
+        out = super().forward(embeddings)[self.net.output("674")]
+        # (1, 400)
+        return np.argmax(out)
+        
