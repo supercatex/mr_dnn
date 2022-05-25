@@ -256,5 +256,6 @@ class ActionRecognitionDecoder(IntelPreTrainedModel):
         embeddings = np.expand_dims(embeddings, 0)
         out = super().forward(embeddings)[self.net.output("674")]
         # (1, 400)
-        return np.argmax(out)
+        indices = np.argsort(out[0])[::-1][:5]
+        return indices
         

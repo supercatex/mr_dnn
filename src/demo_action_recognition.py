@@ -26,7 +26,7 @@ if __name__ == "__main__":
     embeddings = [] # A stack of frame embeddings.
     action_classes = []
     with open("/home/pcms/catkin_ws/src/mr_dnn/src/action_classes.txt", "r") as f:
-        action_classes = f.readlines()
+        action_classes = [x.strip() for x in f.readlines()]
 
     # MAIN LOOP
     rospy.sleep(1)
@@ -41,7 +41,8 @@ if __name__ == "__main__":
         while len(embeddings) > 16: embeddings.pop(0)
         if len(embeddings) == 16:
             out = dnn_action_decoder.forward(embeddings)
-            print(action_classes[out])
+            for i, index in enumerate(out, 1):
+                cv2.putText(canvas, action_classes[index], (5, 25 * i), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 0, 0), 2)
 
         # show image
         cv2.imshow("frame", canvas)
