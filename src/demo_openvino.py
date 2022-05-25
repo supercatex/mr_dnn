@@ -4,6 +4,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2
 from openvino_models import *
+from rospkg import RosPack
 
 
 def callback_image(msg):
@@ -26,7 +27,7 @@ if __name__ == "__main__":
     dnn_emotions = EmotionsRecognition(models_dir)
     dnn_human_pose = HumanPoseEstimation(models_dir)
     dnn_face_reid = FaceReidentification(models_dir)
-    Kinda = np.loadtxt("Kinda.csv")
+    Kinda = np.loadtxt(RosPack().get_path("mr_dnn") + "/Kinda.csv")
 
     # MAIN LOOP
     rospy.sleep(1)
