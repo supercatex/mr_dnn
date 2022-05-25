@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="mr_dnn" type="demo_action_recognition.py" name="demo_action_recognition" output="screen" />
+</launch>

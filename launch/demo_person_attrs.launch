@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="mr_dnn" type="demo_person_attrs.py" name="demo_person_attrs" output="screen" />
+</launch>

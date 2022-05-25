@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="mr_dnn" type="demo_pytorch.py" name="demo_pytorch" output="screen" />
+</launch>
