@@ -25,6 +25,8 @@ if __name__ == "__main__":
     dnn_age_gender = AgeGenderRecognition(models_dir)
     dnn_emotions = EmotionsRecognition(models_dir)
     dnn_human_pose = HumanPoseEstimation(models_dir)
+    dnn_face_reid = FaceReidentification(models_dir)
+    Kinda = np.loadtxt("Kinda.csv", delimiter=",")
 
     # MAIN LOOP
     rospy.sleep(1)
@@ -36,7 +38,7 @@ if __name__ == "__main__":
         # OpenVINO
         boxes = dnn_face.forward(frame)
         for x1, y1, x2, y2 in boxes:
-            face = frame[y1:y2, x1:x2, :]
+            face = frame[y1:y2, x1:x2, :].copy()
             age, gender = dnn_age_gender.forward(face)
             emotion = dnn_emotions.forward(face)
 
@@ -47,6 +49,11 @@ if __name__ == "__main__":
             cv2.putText(canvas, gender, (x1 + 5, y1 + 35), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             cv2.putText(canvas, emotion, (x1 + 5, y1 + 55), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         
+            face_id = dnn_face_reid.forward(face)
+            dist = dnn_face_reid.compare(Kinda, face_id)
+            cv2.putText(canvas, "Kinda" if dist < 0.3 else "Unknown", (x1 + 5, y1 + 75), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            
+
         poses = dnn_human_pose.forward(frame)
         canvas = dnn_human_pose.draw_poses(canvas, poses, 0.1)
         for pose in poses:

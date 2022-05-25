@@ -5,6 +5,7 @@ from numpy.lib.stride_tricks import as_strided
 from openvino.runtime import Core
 from torch import embedding
 from openpose_decoder import OpenPoseDecoder
+from scipy.spatial import distance
 
 
 class IntelPreTrainedModel(object):
@@ -262,3 +263,19 @@ class ActionRecognitionDecoder(IntelPreTrainedModel):
             res.append([index, out[0][index]])
         return res
         
+
+class FaceReidentification(IntelPreTrainedModel):
+    def __init__(self, models_dir: str,) -> None:
+        super().__init__(models_dir, "face-reidentification-retail-0095")
+
+    def forward(self, frame):
+        # (B, C, H, W) => (1, 3, 128, 128) BGR
+        img = frame.copy()
+        img = cv2.resize(img, (128, 128))
+        img = np.expand_dims(img.transpose(2, 0, 1), 0)
+        out = super().forward(img)[self.net.output("658")]
+        # (1, 256, 1, 1)
+        return np.reshape(out, (256))
+
+    def compare(cls, v1, v2):
+        return distance.cosine(v1, v2)
