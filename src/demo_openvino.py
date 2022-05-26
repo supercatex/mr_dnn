@@ -53,8 +53,8 @@ if __name__ == "__main__":
             face_id = dnn_face_reid.forward(face)
             dist = dnn_face_reid.compare(Kinda, face_id)
             cv2.putText(canvas, "Kinda" if dist < 0.3 else "Unknown", (x1 + 5, y1 + 75), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            
-
+        
+        
         poses = dnn_human_pose.forward(frame)
         canvas = dnn_human_pose.draw_poses(canvas, poses, 0.1)
         for pose in poses:
