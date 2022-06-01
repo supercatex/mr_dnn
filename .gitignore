@@ -135,3 +135,8 @@ dmypy.json
 *.pt
 *.pth
 *.bin
+src/.vscode/browse.vc.db
+src/.vscode/settings.json
+src/.vscode/c_cpp_properties.json
+src/.vscode/browse.vc.db-wal
+src/.vscode/browse.vc.db-shm
