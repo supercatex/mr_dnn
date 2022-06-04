@@ -6,6 +6,7 @@ import cv2
 from openvino_models import *
 from rospkg import RosPack
 from paho.mqtt.client import Client
+from netifaces import interfaces, ifaddresses, AF_INET
 
 
 def callback_image(msg):
@@ -26,8 +27,14 @@ if __name__ == "__main__":
     dnn_face = FaceDetection(models_dir)
 
     # MQTT
+    ip = "127.0.0.1"
+    for name in interfaces():
+        addresses = [i['addr'] for i in ifaddresses(name).setdefault(AF_INET, [{'addr': '127.0.0.1'}] )]
+        if name[:2] == "wl": ip = addresses[0]
+    print(ip)
+
     client = Client()
-    client.connect("YOUR IP ADDRESS", 1883, 60)
+    client.connect(ip, 1883, 60)
 
     # MAIN LOOP
     rospy.sleep(1)
@@ -52,17 +59,3 @@ if __name__ == "__main__":
             break
 
     rospy.loginfo("demo node end!")
-
-
-#!/usr/bin/env python3
-
-
-if __name__ == "__main__":
-
-    client = Client()
-    client.connect("YOUR IP ADDRESS", 1883, 60)
-
-    while True:
-        s = input()
-        if s == "q": break
-        client.publish("cmd", s)
