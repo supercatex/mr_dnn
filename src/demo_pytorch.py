@@ -4,7 +4,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
-from pytorch_models import *
+from pcms.pytorch_models import *
 
 
 def callback_image(msg):

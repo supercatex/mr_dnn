@@ -4,7 +4,7 @@ import numpy as np
 from numpy.lib.stride_tricks import as_strided
 from openvino.runtime import Core
 from torch import embedding
-from openpose_decoder import OpenPoseDecoder
+from pcms.openpose_decoder import OpenPoseDecoder
 from scipy.spatial import distance
 
 

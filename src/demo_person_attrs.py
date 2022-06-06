@@ -3,8 +3,8 @@ import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2
-from openvino_models import *
-from pytorch_models import *
+from pcms.openvino_models import *
+from pcms.pytorch_models import *
 
 
 def callback_image(msg):
