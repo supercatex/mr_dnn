@@ -12,8 +12,8 @@ gc.collect()
 # Variables
 PIN16 = Pin(16, Pin.OUT, value=0)
 PIN17 = Pin(17, Pin.OUT, value=0)
-SSID, PSWD = "FablabHome2", "88887777"
-HOST = "192.168.50.52"
+SSID, PSWD = "WIFI SSID", "WIFI PASSWORD"
+HOST = "MQTT SERVER IP"
 
 
 # Connect WIFI
