@@ -8,8 +8,8 @@ from pcms.pytorch_models import *
 
 
 def callback_image(msg):
-    global _frame
-    _frame = CvBridge().imgmsg_to_cv2(msg, "bgr8")
+    global _image
+    _image = CvBridge().imgmsg_to_cv2(msg, "bgr8")
 
 
 if __name__ == "__main__":
@@ -17,40 +17,39 @@ if __name__ == "__main__":
     rospy.loginfo("demo node start!")
 
     # ROS Topics
+    _image = None
     rospy.Subscriber("/camera/rgb/image_raw", Image, callback_image)
-    _frame = rospy.wait_for_message("/camera/rgb/image_raw", Image)
+    rospy.wait_for_message("/camera/rgb/image_raw", Image)
 
     # PyTorch
-    torch_home = "/home/pcms/models/pytorch/"
-    dnn_yolo = Yolov5(torch_home)
+    dnn_yolo = Yolov5()
 
     # OpenVINO
-    models_dir = "/home/pcms/models/openvino/"
-    dnn_attrs = PersonAttributesRecognition(models_dir)
+    dnn_attrs = PersonAttributesRecognition()
 
     # MAIN LOOP
     rospy.sleep(1)
     while not rospy.is_shutdown():
         rospy.Rate(20).sleep()
-        frame = _frame.copy()
-        canvas = _frame.copy()
+        image = _image.copy()
+        frame = _image.copy()
 
         # OpenVINO
-        boxes = dnn_yolo.forward(frame)
+        boxes = dnn_yolo.forward(image)
         for id, index, conf, x1, y1, x2, y2 in boxes:
             if dnn_yolo.labels[index] != "person": continue
 
-            person = frame[y1:y2, x1:x2, :]
+            person = image[y1:y2, x1:x2, :]
             attrs = dnn_attrs.forward(person)
             print(attrs)
-            cv2.rectangle(canvas, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
             i = 0
             for k, v in attrs.items():
-                cv2.putText(canvas, "%s: %d" % (k, v), (x1 + 5, y1 + 15 + i * 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 125), 2)
+                cv2.putText(frame, "%s: %d" % (k, v), (x1 + 5, y1 + 15 + i * 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 125), 2)
                 i = i + 1
 
         # show image
-        cv2.imshow("frame", canvas)
+        cv2.imshow("frame", frame)
         key_code = cv2.waitKey(1)
         if key_code in [27, ord('q')]:
             break
