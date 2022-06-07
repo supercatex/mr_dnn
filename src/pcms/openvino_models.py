@@ -234,6 +234,12 @@ class PersonAttributesRecognition(IntelPreTrainedModel):
 
 class ActionRecognitionEncoder(IntelPreTrainedModel):
     def __init__(self, models_dir: str = None) -> None:
+        if models_dir is None:
+            if "OPENVINO_DIR" in os.environ: 
+                models_dir = os.environ["OPENVINO_DIR"]
+            else:
+                models_dir = "~/models/openvino/"
+                
         ie = Core()
         name = "action-recognition-0001"
         path = "%s/intel/%s/%s-encoder/FP16/%s-encoder.xml" % (models_dir, name, name, name)
@@ -253,6 +259,12 @@ class ActionRecognitionEncoder(IntelPreTrainedModel):
 
 class ActionRecognitionDecoder(IntelPreTrainedModel):
     def __init__(self, models_dir: str = None) -> None:
+        if models_dir is None:
+            if "OPENVINO_DIR" in os.environ: 
+                models_dir = os.environ["OPENVINO_DIR"]
+            else:
+                models_dir = "~/models/openvino/"
+
         ie = Core()
         name = "action-recognition-0001"
         path = "%s/intel/%s/%s-decoder/FP16/%s-decoder.xml" % (models_dir, name, name, name)
