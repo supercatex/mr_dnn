@@ -22,9 +22,8 @@ if __name__ == "__main__":
     rospy.wait_for_message("/camera/rgb/image_raw", Image)
 
     # PyTorch
-    torch_home = "/home/pcms/models/pytorch/"
-    ddn_rcnn = FasterRCNN(torch_home)
-    dnn_yolo = Yolov5(torch_home)
+    ddn_rcnn = FasterRCNN()
+    dnn_yolo = Yolov5()
 
     # MAIN LOOP
     while not rospy.is_shutdown():
