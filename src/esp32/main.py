@@ -1,53 +1,46 @@
-import socket
-from machine import Pin
-import network
-import esp
 import gc
+import esp
 import time
+import network
+from machine import Pin
+from umqtt.simple import MQTTClient
 
 esp.osdebug(None)
 gc.collect()
 
-ssid = "YOUR WIFI NAME"
-password = "YOUR WIFI PASSWORD"
+
+# Variables
+PIN16 = Pin(16, Pin.OUT, value=0)
+PIN17 = Pin(17, Pin.OUT, value=0)
+SSID, PSWD = "FablabHome2", "88887777"
+HOST = "192.168.50.52"
+
+
+# Connect WIFI
 station = network.WLAN(network.STA_IF)
 station.active(True)
-station.connect(ssid, password)
+station.connect(SSID, PSWD)
 
-led_B = Pin(17, Pin.OUT, value=0)
-led_R = Pin(16, Pin.OUT, value=0)
-while station.isconnected() == False:
+while not station.isconnected():
     time.sleep(0.1)
-    led_R.value(not led_R.value())
-led_R.value(1)
+    PIN16.value(not PIN16.value())
+PIN16.value(1)
 print(station.ifconfig())
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('', 80))
-s.listen(5)
 
+# MQTT
+def mqtt_callback(topic, msg):
+    global PIN17
+    if msg == b"1": PIN17.value(1)
+    if msg == b"0": PIN17.value(0)
+
+client = MQTTClient("ESP32", HOST)
+client.set_callback(mqtt_callback)
+client.connect()
+client.subscribe("cmd")
+
+
+# MAIN LOOP
 while True:
-    conn, addr = s.accept()
-    print("Got a connection from %s" % str(addr))
-    
-    request = conn.recv(1024)
-    request = str(request)
-    print("Content = %s" % request)
-    
-    led_on = request.find('/?led=on')
-    led_off = request.find('/?led=off')
-    if led_on > 0:
-        print("LED ON")
-        led_B.value(1)
-    if led_off > 0:
-        print("LED OFF")
-        led_B.value(0)
-    
-    response = "OK"
-    conn.send("HTTP/1.1 200 OK\n")
-    conn.send("Content-Type: text/html\n")
-    conn.send("Connection: close\n\n")
-    conn.sendall(response)
-    conn.close()
-
-led_R.value(0)
+    time.sleep(0.05)
+    client.check_msg()

@@ -27,11 +27,12 @@ if __name__ == "__main__":
     dnn_face = FaceDetection(models_dir)
 
     # MQTT
-    ip = "127.0.0.1"
-    for name in interfaces():
-        addresses = [i['addr'] for i in ifaddresses(name).setdefault(AF_INET, [{'addr': '127.0.0.1'}] )]
-        if name[:2] == "wl": ip = addresses[0]
-    print(ip)
+    ip, name = "127.0.0.1", ""
+    for f in interfaces():
+        addresses = [i["addr"] for i in ifaddresses(f).setdefault(AF_INET, [{"addr": ip}] )]
+        if f[:2] == "wl": ip, name = addresses[0], f
+        if name == "" and f[:2] == "en": ip, name = addresses[0], f
+    print(ip, name)
 
     client = Client()
     client.connect(ip, 1883, 60)
