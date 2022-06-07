@@ -6,10 +6,17 @@ from openvino.runtime import Core
 from torch import embedding
 from pcms.openpose_decoder import OpenPoseDecoder
 from scipy.spatial import distance
+import os
 
 
 class IntelPreTrainedModel(object):
     def __init__(self, models_dir: str, model_group: str, model_name: str) -> None:
+        if models_dir is None:
+            if "OPENVINO_DIR" in os.environ: 
+                models_dir = os.environ["OPENVINO_DIR"]
+            else:
+                models_dir = "~/models/openvino/"
+
         ie = Core()
         name = model_name
         path = "%s/%s/%s/FP16/%s.xml" % (models_dir, model_group, name, name)
@@ -21,7 +28,7 @@ class IntelPreTrainedModel(object):
 
 
 class FaceDetection(IntelPreTrainedModel):
-    def __init__(self, models_dir: str) -> None:
+    def __init__(self, models_dir: str = None) -> None:
         super().__init__(models_dir, "intel", "face-detection-adas-0001")
 
     def forward(self, frame): 
@@ -49,7 +56,7 @@ class FaceDetection(IntelPreTrainedModel):
 
 
 class AgeGenderRecognition(IntelPreTrainedModel):
-    def __init__(self, models_dir: str) -> None:
+    def __init__(self, models_dir: str = None) -> None:
         super().__init__(models_dir, "intel", "age-gender-recognition-retail-0013")
         self.genders_label = ("female", "male")
 
@@ -68,7 +75,7 @@ class AgeGenderRecognition(IntelPreTrainedModel):
 
 
 class EmotionsRecognition(IntelPreTrainedModel):
-    def __init__(self, models_dir: str) -> None:
+    def __init__(self, models_dir: str = None) -> None:
         super().__init__(models_dir, "intel", "emotions-recognition-retail-0003")
         self.emotions_label = ("neutral", "happy", "sad", "surprise", "anger")
 
@@ -107,7 +114,7 @@ class HumanPoseEstimation(IntelPreTrainedModel):
         (5, 11), (6, 12), (5, 6), (5, 7), (6, 8), (7, 9), 
         (8, 10), (1, 2), (0, 1), (0, 2), (1, 3), (2, 4), (3, 5), (4, 6))
 
-    def __init__(self, models_dir: str) -> None:
+    def __init__(self, models_dir: str = None) -> None:
         super().__init__(models_dir, "intel", "human-pose-estimation-0001")
         self.decoder = OpenPoseDecoder()
     
@@ -199,7 +206,7 @@ class HumanPoseEstimation(IntelPreTrainedModel):
 
 
 class PersonAttributesRecognition(IntelPreTrainedModel):
-    def __init__(self, models_dir: str) -> None:
+    def __init__(self, models_dir: str = None) -> None:
         super().__init__(models_dir, "intel", "person-attributes-recognition-crossroad-0230")
 
     def forward(self, frame):
@@ -226,7 +233,7 @@ class PersonAttributesRecognition(IntelPreTrainedModel):
 
 
 class ActionRecognitionEncoder(IntelPreTrainedModel):
-    def __init__(self, models_dir: str) -> None:
+    def __init__(self, models_dir: str = None) -> None:
         ie = Core()
         name = "action-recognition-0001"
         path = "%s/intel/%s/%s-encoder/FP16/%s-encoder.xml" % (models_dir, name, name, name)
@@ -245,7 +252,7 @@ class ActionRecognitionEncoder(IntelPreTrainedModel):
 
 
 class ActionRecognitionDecoder(IntelPreTrainedModel):
-    def __init__(self, models_dir: str) -> None:
+    def __init__(self, models_dir: str = None) -> None:
         ie = Core()
         name = "action-recognition-0001"
         path = "%s/intel/%s/%s-decoder/FP16/%s-decoder.xml" % (models_dir, name, name, name)
@@ -265,7 +272,7 @@ class ActionRecognitionDecoder(IntelPreTrainedModel):
         
 
 class FaceReidentification(IntelPreTrainedModel):
-    def __init__(self, models_dir: str,) -> None:
+    def __init__(self, models_dir: str = None) -> None:
         super().__init__(models_dir, "intel", "face-reidentification-retail-0095")
 
     def forward(self, frame):
