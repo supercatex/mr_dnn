@@ -4,7 +4,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2
 from pcms.openvino_models import *
-from pcms.model_labels import ACTION_LABELS
+from pcms.model_labels import ACTION_CLASSES
 
 
 def callback_image(msg):
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     dnn_action_encoder = ActionRecognitionEncoder()
     dnn_action_decoder = ActionRecognitionDecoder()
     embeddings = [] # A stack of frame embeddings.
-    action_classes = ACTION_LABELS
+    action_classes = ACTION_CLASSES
 
     # MAIN LOOP
     rospy.sleep(1)

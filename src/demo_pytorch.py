@@ -17,8 +17,9 @@ if __name__ == "__main__":
     rospy.loginfo("demo node start!")
 
     # ROS Topics
+    _frame = None
     rospy.Subscriber("/camera/rgb/image_raw", Image, callback_image)
-    _frame = rospy.wait_for_message("/camera/rgb/image_raw", Image)
+    rospy.wait_for_message("/camera/rgb/image_raw", Image)
 
     # PyTorch
     torch_home = "/home/pcms/models/pytorch/"

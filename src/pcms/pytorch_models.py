@@ -5,10 +5,17 @@ import numpy as np
 import torch
 from torchvision.models.detection import fasterrcnn_mobilenet_v3_large_320_fpn
 from torchvision.models.detection import keypointrcnn_resnet50_fpn
+from pcms.model_labels import COCO_CLASSES
 
 
 class TorchModel(object):
-    def __init__(self, torch_home) -> None:
+    def __init__(self, torch_home: str) -> None:
+        if torch_home is None:
+            if "TORCHHUB_DIR" in os.environ:
+                torch_home = os.environ["TORCHHUB_DIR"]
+            else:
+                torch_home = "~/models/pytorch/"
+                
         os.environ["TORCH_HOME"] = torch_home
         self.device = "cpu"
     
@@ -23,26 +30,11 @@ class TorchModel(object):
     
 
 class FasterRCNN(TorchModel):
-    COCO_CLASSES = [
-        '__background__', 'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
-        'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'N/A', 'stop sign',
-        'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
-        'elephant', 'bear', 'zebra', 'giraffe', 'N/A', 'backpack', 'umbrella', 'N/A', 'N/A',
-        'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball',
-        'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket',
-        'bottle', 'N/A', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl',
-        'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza',
-        'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'N/A', 'dining table',
-        'N/A', 'N/A', 'toilet', 'N/A', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
-        'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'N/A', 'book',
-        'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush'
-    ]
-
-    def __init__(self, torch_home) -> None:
+    def __init__(self, torch_home: str = None) -> None:
         super().__init__(torch_home)
         self.net = fasterrcnn_mobilenet_v3_large_320_fpn(pretrained=True)
         self.net.eval().to(self.device)
-        self.labels = self.COCO_CLASSES
+        self.labels = COCO_CLASSES
     
     def forward(self, frame):
         img = self.BGR2Tensor(frame)
@@ -60,7 +52,7 @@ class FasterRCNN(TorchModel):
 
 
 class Yolov5(TorchModel):
-    def __init__(self, torch_home) -> None:
+    def __init__(self, torch_home: str = None) -> None:
         super().__init__(torch_home)
         self.net = torch.hub.load("ultralytics/yolov5", "yolov5s", device="cpu")
         self.net.eval().to(self.device)
