@@ -303,8 +303,12 @@ class FaceReidentification(IntelPreTrainedModel):
         
         
 class Yolov8():
-    def __init__(self, models_dir: str = None) -> None:
-        self.path = "/home/pcms/models/openvino/yolo/yolov8n.onnx"
+    def __init__(self, model_name: str = None, models_dir: str = None) -> None:
+        if models_dir is None:
+            models_dir = "/home/pcms/models/openvino"
+        if model_name is None:
+            model_name = "yolov8n.onnx"
+        self.path = "%s/yolo/%s" % (models_dir, model_name)
         self.classes = yaml_load(check_yaml('coco128.yaml'))['names']
         self.colors = np.random.uniform(0, 255, size=(len(self.classes), 3))
         self.model = cv2.dnn.readNetFromONNX(self.path)

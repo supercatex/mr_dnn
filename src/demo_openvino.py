@@ -29,7 +29,7 @@ if __name__ == "__main__":
     dnn_human_pose = HumanPoseEstimation()
     dnn_face_reid = FaceReidentification()
     Kinda = np.loadtxt(RosPack().get_path("mr_dnn") + "/Kinda.csv")
-    dnn_yolo = Yolov8()
+    dnn_yolo = Yolov8("yolov8s.onnx")
 
     # MAIN LOOP
     rospy.sleep(1)
