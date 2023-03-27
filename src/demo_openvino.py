@@ -30,7 +30,7 @@ if __name__ == "__main__":
     dnn_human_pose = HumanPoseEstimation()
     dnn_face_reid = FaceReidentification()
     Kinda = np.loadtxt(RosPack().get_path("mr_dnn") + "/Kinda.csv")
-    dnn_yolo = Yolov8("yolov8s")
+    dnn_yolo = Yolov8("yolov8n")
 
     # MAIN LOOP
     rospy.sleep(1)
@@ -40,6 +40,34 @@ if __name__ == "__main__":
         rospy.Rate(20).sleep()
         image = _image.copy()
         frame = _image.copy()
+        
+        # OpenVINO
+        # Face
+        boxes = dnn_face.forward(image)
+        for x1, y1, x2, y2 in boxes:
+            face = image[y1:y2, x1:x2, :].copy()
+            age, gender = dnn_age_gender.forward(face)
+            emotion = dnn_emotions.forward(face)
+
+            gender = dnn_age_gender.genders_label[gender]
+            emotion = dnn_emotions.emotions_label[emotion]
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.putText(frame, "Age: %d" % age, (x1 + 5, y1 + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(frame, gender, (x1 + 5, y1 + 35), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(frame, emotion, (x1 + 5, y1 + 55), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+
+            face_id = dnn_face_reid.forward(face)
+            dist = dnn_face_reid.compare(Kinda, face_id)
+            cv2.putText(frame, "Kinda" if dist < 0.3 else "Unknown", (x1 + 5, y1 + 75), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+
+
+        # Pose
+        poses = dnn_human_pose.forward(image)
+        frame = dnn_human_pose.draw_poses(frame, poses, 0.1)
+        for pose in poses:
+            for i, p in enumerate(pose):
+                x, y, c = map(int, p)
+                cv2.circle(frame, (x, y), 5, (0, 0, 255), -1)
 
         # Yolov8
         detections = dnn_yolo.forward(frame)
