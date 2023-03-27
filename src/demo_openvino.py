@@ -70,7 +70,6 @@ if __name__ == "__main__":
         ## Yolov8
         detections = dnn_yolo.forward(frame)
         for i, detection in enumerate(detections):
-            print(detection)
             class_name = detection["class_name"]
             class_id = detection["class_id"]
             score = detection["confidence"]
