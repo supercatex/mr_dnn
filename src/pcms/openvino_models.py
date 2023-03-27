@@ -9,6 +9,7 @@ from scipy.spatial import distance
 import os
 from ultralytics.yolo.utils import ROOT, yaml_load
 from ultralytics.yolo.utils.checks import check_yaml
+from pcms.openvino_yolov8 import *
 
 
 class IntelPreTrainedModel(object):
@@ -308,64 +309,32 @@ class Yolov8():
             models_dir = "/home/pcms/models/openvino"
         if model_name is None:
             model_name = "yolov8n.onnx"
-        self.path = "%s/yolo/%s" % (models_dir, model_name)
+        # self.path = "%s/yolo/%s" % (models_dir, model_name)
         self.classes = yaml_load(check_yaml('coco128.yaml'))['names']
         self.colors = np.random.uniform(0, 255, size=(len(self.classes), 3))
-        self.model = cv2.dnn.readNetFromONNX(self.path)
+        # self.model = cv2.dnn.readNetFromONNX(self.path)
 
-    def draw_bounding_box(self, img, class_id, confidence, x, y, x_plus_w, y_plus_h):
-        label = "%s (%.2f)" % (self.classes[class_id], confidence)
-        color = self.colors[class_id]
-        cv2.rectangle(img, (x, y), (x_plus_w, y_plus_h), color, 2)
-        cv2.putText(img, label, (x - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+        ie = Core()
+        name = model_name
+        path = "%s/%s/%s/%s.xml" % (models_dir, "yolo", name, name)
+        net = ie.read_model(model=path)
+        self.model = ie.compile_model(model=net, device_name="CPU")
+
+    def draw_bounding_box(self, detections, input_image):
+        draw_results(detections, input_image, self.classes)
 
     def forward(self, frame):
-        # 640 x 640
-        h, w, c = frame.shape
-        s = max((h, w))
-        image = np.zeros((s, s, 3), np.uint8)
-        image[:h, :w, :] = frame
-        scale = s / 640
-
-        blob = cv2.dnn.blobFromImage(image, scalefactor=1.0/255, size=(640, 640))
-        self.model.setInput(blob)
-        outputs = self.model.forward()
-
-        outputs = np.array([cv2.transpose(outputs[0])])
-        rows = outputs.shape[1]
-
-        boxes = []
-        scores = []
-        class_ids = []
-
-        for i in range(rows):
-            classes_scores = outputs[0][i][4:]
-            (minScore, maxScore, minClassLoc, (x, maxClassIndex)) = cv2.minMaxLoc(classes_scores)
-            if maxScore >= 0.25:
-                box = [
-                    outputs[0][i][0] - (0.5 * outputs[0][i][2]), outputs[0][i][1] - (0.5 * outputs[0][i][3]),
-                    outputs[0][i][2], outputs[0][i][3]]
-                boxes.append(box)
-                scores.append(maxScore)
-                class_ids.append(maxClassIndex)
-
-        result_boxes = cv2.dnn.NMSBoxes(boxes, scores, 0.25, 0.45, 0.5)
-
-        detections = []
-        for i in range(len(result_boxes)):
-            index = result_boxes[i]
-            box = boxes[index]
-            x1 = round(box[0] * scale)
-            y1 = round(box[1] * scale)
-            x2 = round((box[0] + box[2]) * scale)
-            y2 = round((box[1] + box[3]) * scale)
-            
-            detection = {
-                'class_id': class_ids[index],
-                'class_name': self.classes[class_ids[index]],
-                'confidence': scores[index],
-                'box': [x1, y1, x2, y2],
-                'scale': scale}
-            detections.append(detection)
+        image = frame.copy()
+        num_outputs = len(self.model.outputs)
+        preprocessed_image = preprocess_image(image)
+        input_tensor = image_to_tensor(preprocessed_image)
+        result = self.model([input_tensor])
+        boxes = result[self.model.output(0)]
+        masks = None
+        if num_outputs > 1:
+            masks = result[self.model.output(1)]
+        input_hw = input_tensor.shape[2:]
+        detections = postprocess(pred_boxes=boxes, input_hw=input_hw, orig_img=image, pred_masks=masks)
+        # {"det": [[x1, y1, x2, y2, score, label_id], ...]}
         return detections
-        
+    
