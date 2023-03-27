@@ -5,6 +5,7 @@ from cv_bridge import CvBridge
 import cv2
 from pcms.openvino_models import *
 from rospkg import RosPack
+import time
 
 
 def callback_image(msg):
@@ -28,15 +29,19 @@ if __name__ == "__main__":
     dnn_human_pose = HumanPoseEstimation()
     dnn_face_reid = FaceReidentification()
     Kinda = np.loadtxt(RosPack().get_path("mr_dnn") + "/Kinda.csv")
+    dnn_yolo = Yolov8()
 
     # MAIN LOOP
     rospy.sleep(1)
+    fps, fps_n = 0, 0
     while not rospy.is_shutdown():
+        t1 = time.time()
         rospy.Rate(20).sleep()
         image = _image.copy()
         frame = _image.copy()
 
         # OpenVINO
+        ## Face
         boxes = dnn_face.forward(image)
         for x1, y1, x2, y2 in boxes:
             face = image[y1:y2, x1:x2, :].copy()
@@ -54,6 +59,7 @@ if __name__ == "__main__":
             dist = dnn_face_reid.compare(Kinda, face_id)
             cv2.putText(frame, "Kinda" if dist < 0.3 else "Unknown", (x1 + 5, y1 + 75), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         
+        ## Pose
         poses = dnn_human_pose.forward(image)
         frame = dnn_human_pose.draw_poses(frame, poses, 0.1)
         for pose in poses:
@@ -61,6 +67,22 @@ if __name__ == "__main__":
                 x, y, c = map(int, p)
                 cv2.circle(frame, (x, y), 5, (0, 0, 255), -1)
 
+        ## Yolov8
+        detections = dnn_yolo.forward(frame)
+        for i, detection in enumerate(detections):
+            print(detection)
+            class_name = detection["class_name"]
+            class_id = detection["class_id"]
+            score = detection["confidence"]
+            scale = detection["scale"]
+            box =  detection["box"]
+            dnn_yolo.draw_bounding_box(frame, class_id, score, round(box[0] * scale), round(box[1] * scale), round((box[0] + box[2]) * scale), round((box[1] + box[3]) * scale))
+        
+        t2 = time.time()
+        fps = (fps * fps_n + 1.0 / (t2 - t1)) / (fps_n + 1)
+        fps_n += 1
+        cv2.putText(frame, "%.2ffps" % (fps), (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)        
+        
         # show image
         cv2.imshow("frame", frame)
         key_code = cv2.waitKey(1)
