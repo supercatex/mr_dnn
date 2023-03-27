@@ -75,8 +75,8 @@ if __name__ == "__main__":
             class_id = detection["class_id"]
             score = detection["confidence"]
             scale = detection["scale"]
-            box =  detection["box"]
-            dnn_yolo.draw_bounding_box(frame, class_id, score, round(box[0] * scale), round(box[1] * scale), round((box[0] + box[2]) * scale), round((box[1] + box[3]) * scale))
+            x1, y1, x2, y2 = detection["box"]
+            dnn_yolo.draw_bounding_box(frame, class_id, score, x1, y1, x2, y2)
         
         t2 = time.time()
         fps = (fps * fps_n + 1.0 / (t2 - t1)) / (fps_n + 1)

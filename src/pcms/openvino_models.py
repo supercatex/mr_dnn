@@ -351,13 +351,17 @@ class Yolov8():
         for i in range(len(result_boxes)):
             index = result_boxes[i]
             box = boxes[index]
+            x1 = round(box[0] * scale)
+            y1 = round(box[1] * scale)
+            x2 = round((box[0] + box[2]) * scale)
+            y2 = round((box[1] + box[3]) * scale)
+            
             detection = {
                 'class_id': class_ids[index],
                 'class_name': self.classes[class_ids[index]],
                 'confidence': scores[index],
-                'box': box,
+                'box': [x1, y1, x2, y2],
                 'scale': scale}
             detections.append(detection)
-            #draw_bounding_box(frame, class_ids[index], scores[index], round(box[0] * scale), round(box[1] * scale), round((box[0] + box[2]) * scale), round((box[1] + box[3]) * scale))
         return detections
         
