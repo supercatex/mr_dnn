@@ -30,7 +30,7 @@ if __name__ == "__main__":
     dnn_human_pose = HumanPoseEstimation()
     dnn_face_reid = FaceReidentification()
     Kinda = np.loadtxt(RosPack().get_path("mr_dnn") + "/Kinda.csv")
-    dnn_yolo = Yolov8("yolov8n")
+    dnn_yolo = Yolov8("yolov8n-seg")
 
     # MAIN LOOP
     rospy.sleep(1)
@@ -59,8 +59,7 @@ if __name__ == "__main__":
             face_id = dnn_face_reid.forward(face)
             dist = dnn_face_reid.compare(Kinda, face_id)
             cv2.putText(frame, "Kinda" if dist < 0.3 else "Unknown", (x1 + 5, y1 + 75), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-
-
+        
         # Pose
         poses = dnn_human_pose.forward(image)
         frame = dnn_human_pose.draw_poses(frame, poses, 0.1)
@@ -71,7 +70,9 @@ if __name__ == "__main__":
 
         # Yolov8
         detections = dnn_yolo.forward(frame)
+        # print(detections)
         for i, detection in enumerate(detections):
+            frame = draw_results(detection, frame, dnn_yolo.classes)
             dnn_yolo.draw_bounding_box(detection, frame)
         
         t2 = time.time()

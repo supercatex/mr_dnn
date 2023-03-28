@@ -10,6 +10,7 @@ import os
 from ultralytics.yolo.utils import ROOT, yaml_load
 from ultralytics.yolo.utils.checks import check_yaml
 from pcms.openvino_yolov8 import *
+from ultralytics import YOLO
 
 
 class IntelPreTrainedModel(object):
@@ -308,7 +309,7 @@ class Yolov8():
         if models_dir is None:
             models_dir = "/home/pcms/models/openvino"
         if model_name is None:
-            model_name = "yolov8n.onnx"
+            model_name = "yolov8n"
         # self.path = "%s/yolo/%s" % (models_dir, model_name)
         self.classes = yaml_load(check_yaml('coco128.yaml'))['names']
         self.colors = np.random.uniform(0, 255, size=(len(self.classes), 3))
