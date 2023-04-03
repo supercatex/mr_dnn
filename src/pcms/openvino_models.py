@@ -25,7 +25,8 @@ class IntelPreTrainedModel(object):
         name = model_name
         path = "%s/%s/%s/FP16/%s.xml" % (models_dir, model_group, name, name)
         net = ie.read_model(model=path)
-        self.net = ie.compile_model(model=net, device_name="CPU")
+        device_name = "GPU"
+        self.net = ie.compile_model(model=net, device_name=device_name)
     
     def forward(self, inputs):
         return self.net(inputs=[inputs])
@@ -319,7 +320,10 @@ class Yolov8():
         name = model_name
         path = "%s/%s/%s/%s.xml" % (models_dir, "yolo", name, name)
         net = ie.read_model(model=path)
-        self.model = ie.compile_model(model=net, device_name="CPU")
+        device_name = "GPU"
+        if device_name != "CPU":
+            net.reshape({0: [1, 3, 640, 640]})
+        self.model = ie.compile_model(model=net, device_name=device_name)
 
     def draw_bounding_box(self, detections, input_image):
         draw_results(detections, input_image, self.classes)
@@ -335,7 +339,7 @@ class Yolov8():
         if num_outputs > 1:
             masks = result[self.model.output(1)]
         input_hw = input_tensor.shape[2:]
-        detections = postprocess(pred_boxes=boxes, input_hw=input_hw, orig_img=image, pred_masks=masks)
+        detections = postprocess(pred_boxes=boxes, input_hw=input_hw, orig_img=image, pred_masks=masks, n_classes=len(self.classes))
         # {"det": [[x1, y1, x2, y2, score, label_id], ...]}
         return detections
     

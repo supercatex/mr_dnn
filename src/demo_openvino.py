@@ -43,37 +43,42 @@ if __name__ == "__main__":
         
         # OpenVINO
         # Face
-        boxes = dnn_face.forward(image)
-        for x1, y1, x2, y2 in boxes:
-            face = image[y1:y2, x1:x2, :].copy()
-            age, gender = dnn_age_gender.forward(face)
-            emotion = dnn_emotions.forward(face)
+        if True:
+            boxes = dnn_face.forward(image)
+            for x1, y1, x2, y2 in boxes:
+                if True:
+                    face = image[y1:y2, x1:x2, :].copy()
+                    age, gender = dnn_age_gender.forward(face)
+                    emotion = dnn_emotions.forward(face)
 
-            gender = dnn_age_gender.genders_label[gender]
-            emotion = dnn_emotions.emotions_label[emotion]
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            cv2.putText(frame, "Age: %d" % age, (x1 + 5, y1 + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            cv2.putText(frame, gender, (x1 + 5, y1 + 35), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            cv2.putText(frame, emotion, (x1 + 5, y1 + 55), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                    gender = dnn_age_gender.genders_label[gender]
+                    emotion = dnn_emotions.emotions_label[emotion]
+                    cv2.putText(frame, "Age: %d" % age, (x1 + 5, y1 + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                    cv2.putText(frame, gender, (x1 + 5, y1 + 35), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                    cv2.putText(frame, emotion, (x1 + 5, y1 + 55), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
-            face_id = dnn_face_reid.forward(face)
-            dist = dnn_face_reid.compare(Kinda, face_id)
-            cv2.putText(frame, "Kinda" if dist < 0.3 else "Unknown", (x1 + 5, y1 + 75), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                    face_id = dnn_face_reid.forward(face)
+                    dist = dnn_face_reid.compare(Kinda, face_id)
+                    cv2.putText(frame, "Kinda" if dist < 0.3 else "Unknown", (x1 + 5, y1 + 75), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
         # Pose
-        poses = dnn_human_pose.forward(image)
-        frame = dnn_human_pose.draw_poses(frame, poses, 0.1)
-        for pose in poses:
-            for i, p in enumerate(pose):
-                x, y, c = map(int, p)
-                cv2.circle(frame, (x, y), 5, (0, 0, 255), -1)
+        if True:
+            poses = dnn_human_pose.forward(image)
+            frame = dnn_human_pose.draw_poses(frame, poses, 0.1)
+            for pose in poses:
+                for i, p in enumerate(pose):
+                    x, y, c = map(int, p)
+                    cv2.circle(frame, (x, y), 5, (0, 0, 255), -1)
 
         # Yolov8
-        detections = dnn_yolo.forward(frame)
-        # print(detections)
-        for i, detection in enumerate(detections):
-            frame = draw_results(detection, frame, dnn_yolo.classes)
-            dnn_yolo.draw_bounding_box(detection, frame)
+        if True:
+            detections = dnn_yolo.forward(image)
+            # print(detections)
+            for i, detection in enumerate(detections):
+                frame = draw_results(detection, frame, dnn_yolo.classes)
+                dnn_yolo.draw_bounding_box(detection, frame)
         
         t2 = time.time()
         fps = (fps * fps_n + 1.0 / (t2 - t1)) / (fps_n + 1)
@@ -81,7 +86,9 @@ if __name__ == "__main__":
         cv2.putText(frame, "%.2ffps" % (fps), (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)        
         
         # show image
-        cv2.imshow("frame", frame)
+        h, w = frame.shape[:2]
+        frame2 = cv2.resize(frame, (w * 2, h * 2))
+        cv2.imshow("frame", frame2)
         key_code = cv2.waitKey(1)
         if key_code in [27, ord('q')]:
             break

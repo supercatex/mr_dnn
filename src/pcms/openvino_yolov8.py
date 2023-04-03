@@ -158,7 +158,8 @@ def postprocess(
     agnosting_nms:bool = False,
     max_detections:int = 300,
     pred_masks:np.ndarray = None,
-    retina_mask:bool = False
+    retina_mask:bool = False,
+    n_classes:int = 80
 ):
     """
     YOLOv8 model postprocessing function. Applied non maximum supression algorithm to detections and rescale boxes to original image size
@@ -182,7 +183,7 @@ def postprocess(
         torch.from_numpy(pred_boxes),
         min_conf_threshold,
         nms_iou_threshold,
-        nc=80,
+        nc=n_classes,
         **nms_kwargs
     )
     results = []
