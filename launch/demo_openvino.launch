@@ -1,3 +1,14 @@
 <launch>
-    <node pkg="mr_dnn" type="demo_openvino.py" name="demo_openvino" output="screen" />
+    <arg name="device" default="CPU" />
+    <arg name="dnn_face" default="true" />
+    <arg name="dnn_face_attrs" default="true" />
+    <arg name="dnn_pose" default="true" />
+    <arg name="dnn_yolo" default="true" />
+    <node pkg="mr_dnn" type="demo_openvino.py" name="demo_openvino" output="screen">
+        <param name="device" value="$(arg device)" />
+        <param name="dnn_face" value="$(arg dnn_face)" />
+        <param name="dnn_face_attrs" value="$(arg dnn_face_attrs)" />
+        <param name="dnn_pose" value="$(arg dnn_pose)" />
+        <param name="dnn_yolo" value="$(arg dnn_yolo)" />
+    </node>
 </launch>

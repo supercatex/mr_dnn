@@ -8,12 +8,6 @@ from rospkg import RosPack
 import time
 
 
-_DEVICE_NAME = "CPU"
-_DNN_FACE = True
-_DNN_POSE = True
-_DNN_YOLO = True
-
-
 def callback_image(msg):
     global _image
     _image = CvBridge().imgmsg_to_cv2(msg, "bgr8")
@@ -22,6 +16,13 @@ def callback_image(msg):
 if __name__ == "__main__":
     rospy.init_node("demo")
     rospy.loginfo("demo node start!")
+
+    _DEVICE_NAME = rospy.get_param("~device")
+    _DNN_FACE = rospy.get_param("~dnn_face")
+    _DNN_FACE_ATTRS = rospy.get_param("~dnn_face_attrs")
+    _DNN_POSE = rospy.get_param("~dnn_pose")
+    _DNN_YOLO = rospy.get_param("~dnn_yolo")
+    rospy.loginfo("Using %s device." % _DEVICE_NAME)
 
     # ROS Topics
     _image = None
@@ -52,7 +53,7 @@ if __name__ == "__main__":
         if _DNN_FACE:
             boxes = dnn_face.forward(image)
             for x1, y1, x2, y2 in boxes:
-                if True:
+                if _DNN_FACE_ATTRS:
                     face = image[y1:y2, x1:x2, :].copy()
                     age, gender = dnn_age_gender.forward(face)
                     emotion = dnn_emotions.forward(face)
