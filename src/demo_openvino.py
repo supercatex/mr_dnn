@@ -8,6 +8,12 @@ from rospkg import RosPack
 import time
 
 
+_DEVICE_NAME = "CPU"
+_DNN_FACE = True
+_DNN_POSE = True
+_DNN_YOLO = True
+
+
 def callback_image(msg):
     global _image
     _image = CvBridge().imgmsg_to_cv2(msg, "bgr8")
@@ -24,13 +30,13 @@ if __name__ == "__main__":
     rospy.wait_for_message("/camera/rgb/image_raw", Image)
 
     # OpenVINO
-    dnn_face = FaceDetection()
-    dnn_age_gender = AgeGenderRecognition()
-    dnn_emotions = EmotionsRecognition()
-    dnn_human_pose = HumanPoseEstimation()
-    dnn_face_reid = FaceReidentification()
+    dnn_face = FaceDetection(device_name=_DEVICE_NAME)
+    dnn_age_gender = AgeGenderRecognition(device_name=_DEVICE_NAME)
+    dnn_emotions = EmotionsRecognition(device_name=_DEVICE_NAME)
+    dnn_human_pose = HumanPoseEstimation(device_name=_DEVICE_NAME)
+    dnn_face_reid = FaceReidentification(device_name=_DEVICE_NAME)
     Kinda = np.loadtxt(RosPack().get_path("mr_dnn") + "/Kinda.csv")
-    dnn_yolo = Yolov8("yolov8n-seg")
+    dnn_yolo = Yolov8("yolov8n-seg", device_name=_DEVICE_NAME)
 
     # MAIN LOOP
     rospy.sleep(1)
@@ -43,7 +49,7 @@ if __name__ == "__main__":
         
         # OpenVINO
         # Face
-        if True:
+        if _DNN_FACE:
             boxes = dnn_face.forward(image)
             for x1, y1, x2, y2 in boxes:
                 if True:
@@ -64,7 +70,7 @@ if __name__ == "__main__":
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
         # Pose
-        if True:
+        if _DNN_POSE:
             poses = dnn_human_pose.forward(image)
             frame = dnn_human_pose.draw_poses(frame, poses, 0.1)
             for pose in poses:
@@ -73,7 +79,7 @@ if __name__ == "__main__":
                     cv2.circle(frame, (x, y), 5, (0, 0, 255), -1)
 
         # Yolov8
-        if True:
+        if _DNN_YOLO:
             detections = dnn_yolo.forward(image)
             # print(detections)
             for i, detection in enumerate(detections):

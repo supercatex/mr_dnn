@@ -14,7 +14,7 @@ from ultralytics import YOLO
 
 
 class IntelPreTrainedModel(object):
-    def __init__(self, models_dir: str, model_group: str, model_name: str) -> None:
+    def __init__(self, models_dir: str, model_group: str, model_name: str, device_name: str = "CPU") -> None:
         if models_dir is None:
             if "OPENVINO_DIR" in os.environ: 
                 models_dir = os.environ["OPENVINO_DIR"]
@@ -25,7 +25,7 @@ class IntelPreTrainedModel(object):
         name = model_name
         path = "%s/%s/%s/FP16/%s.xml" % (models_dir, model_group, name, name)
         net = ie.read_model(model=path)
-        device_name = "GPU"
+        device_name = device_name
         self.net = ie.compile_model(model=net, device_name=device_name)
     
     def forward(self, inputs):
@@ -33,8 +33,8 @@ class IntelPreTrainedModel(object):
 
 
 class FaceDetection(IntelPreTrainedModel):
-    def __init__(self, models_dir: str = None) -> None:
-        super().__init__(models_dir, "intel", "face-detection-adas-0001")
+    def __init__(self, models_dir: str = None, device_name: str = "CPU") -> None:
+        super().__init__(models_dir, "intel", "face-detection-adas-0001", device_name)
 
     def forward(self, frame): 
         # (B, C, H, W) => (1, 3, 384, 672) RGB
@@ -61,8 +61,8 @@ class FaceDetection(IntelPreTrainedModel):
 
 
 class AgeGenderRecognition(IntelPreTrainedModel):
-    def __init__(self, models_dir: str = None) -> None:
-        super().__init__(models_dir, "intel", "age-gender-recognition-retail-0013")
+    def __init__(self, models_dir: str = None, device_name: str = "CPU") -> None:
+        super().__init__(models_dir, "intel", "age-gender-recognition-retail-0013", device_name)
         self.genders_label = ("female", "male")
 
     def forward(self, frame): 
@@ -80,8 +80,8 @@ class AgeGenderRecognition(IntelPreTrainedModel):
 
 
 class EmotionsRecognition(IntelPreTrainedModel):
-    def __init__(self, models_dir: str = None) -> None:
-        super().__init__(models_dir, "intel", "emotions-recognition-retail-0003")
+    def __init__(self, models_dir: str = None, device_name: str = "CPU") -> None:
+        super().__init__(models_dir, "intel", "emotions-recognition-retail-0003", device_name)
         self.emotions_label = ("neutral", "happy", "sad", "surprise", "anger")
 
     def forward(self, frame):
@@ -119,8 +119,8 @@ class HumanPoseEstimation(IntelPreTrainedModel):
         (5, 11), (6, 12), (5, 6), (5, 7), (6, 8), (7, 9), 
         (8, 10), (1, 2), (0, 1), (0, 2), (1, 3), (2, 4), (3, 5), (4, 6))
 
-    def __init__(self, models_dir: str = None) -> None:
-        super().__init__(models_dir, "intel", "human-pose-estimation-0001")
+    def __init__(self, models_dir: str = None, device_name: str = "CPU") -> None:
+        super().__init__(models_dir, "intel", "human-pose-estimation-0001", device_name)
         self.decoder = OpenPoseDecoder()
     
     def forward(self, frame):
@@ -211,8 +211,8 @@ class HumanPoseEstimation(IntelPreTrainedModel):
 
 
 class PersonAttributesRecognition(IntelPreTrainedModel):
-    def __init__(self, models_dir: str = None) -> None:
-        super().__init__(models_dir, "intel", "person-attributes-recognition-crossroad-0230")
+    def __init__(self, models_dir: str = None, device_name: str = "CPU") -> None:
+        super().__init__(models_dir, "intel", "person-attributes-recognition-crossroad-0230", device_name)
 
     def forward(self, frame):
         # (B, C, H, W) => (1, 3, 160, 80) BGR
@@ -238,7 +238,7 @@ class PersonAttributesRecognition(IntelPreTrainedModel):
 
 
 class ActionRecognitionEncoder(IntelPreTrainedModel):
-    def __init__(self, models_dir: str = None) -> None:
+    def __init__(self, models_dir: str = None, device_name: str = "CPU") -> None:
         if models_dir is None:
             if "OPENVINO_DIR" in os.environ: 
                 models_dir = os.environ["OPENVINO_DIR"]
@@ -249,7 +249,7 @@ class ActionRecognitionEncoder(IntelPreTrainedModel):
         name = "action-recognition-0001"
         path = "%s/intel/%s/%s-encoder/FP16/%s-encoder.xml" % (models_dir, name, name, name)
         net = ie.read_model(model=path)
-        self.net = ie.compile_model(model=net, device_name="CPU")
+        self.net = ie.compile_model(model=net, device_name=device_name)
     
     def forward(self, frame):
         # (B, C, H, W) => (1, 3, 224, 224) BGR
@@ -263,7 +263,7 @@ class ActionRecognitionEncoder(IntelPreTrainedModel):
 
 
 class ActionRecognitionDecoder(IntelPreTrainedModel):
-    def __init__(self, models_dir: str = None) -> None:
+    def __init__(self, models_dir: str = None, device_name: str = "CPU") -> None:
         if models_dir is None:
             if "OPENVINO_DIR" in os.environ: 
                 models_dir = os.environ["OPENVINO_DIR"]
@@ -274,7 +274,7 @@ class ActionRecognitionDecoder(IntelPreTrainedModel):
         name = "action-recognition-0001"
         path = "%s/intel/%s/%s-decoder/FP16/%s-decoder.xml" % (models_dir, name, name, name)
         net = ie.read_model(model=path)
-        self.net = ie.compile_model(model=net, device_name="CPU")
+        self.net = ie.compile_model(model=net, device_name=device_name)
     
     def forward(self, embeddings):
         # (B, T, C) => (1, 16, 512)
@@ -289,8 +289,8 @@ class ActionRecognitionDecoder(IntelPreTrainedModel):
         
 
 class FaceReidentification(IntelPreTrainedModel):
-    def __init__(self, models_dir: str = None) -> None:
-        super().__init__(models_dir, "intel", "face-reidentification-retail-0095")
+    def __init__(self, models_dir: str = None, device_name: str = "CPU") -> None:
+        super().__init__(models_dir, "intel", "face-reidentification-retail-0095", device_name)
 
     def forward(self, frame):
         # (B, C, H, W) => (1, 3, 128, 128) BGR
@@ -306,7 +306,7 @@ class FaceReidentification(IntelPreTrainedModel):
         
         
 class Yolov8():
-    def __init__(self, model_name: str = None, models_dir: str = None) -> None:
+    def __init__(self, model_name: str = None, models_dir: str = None, device_name: str = "CPU") -> None:
         if models_dir is None:
             models_dir = "/home/pcms/models/openvino"
         if model_name is None:
@@ -320,7 +320,6 @@ class Yolov8():
         name = model_name
         path = "%s/%s/%s/%s.xml" % (models_dir, "yolo", name, name)
         net = ie.read_model(model=path)
-        device_name = "GPU"
         if device_name != "CPU":
             net.reshape({0: [1, 3, 640, 640]})
         self.model = ie.compile_model(model=net, device_name=device_name)
