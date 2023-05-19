@@ -22,15 +22,17 @@ if __name__ == "__main__":
     _DNN_FACE_ATTRS = rospy.get_param("~dnn_face_attrs")
     _DNN_POSE = rospy.get_param("~dnn_pose")
     _DNN_YOLO = rospy.get_param("~dnn_yolo")
+    _DEVICE_NAME = "CPU"
     rospy.loginfo("Using %s device." % _DEVICE_NAME)
 
     # ROS Topics
     _image = None
-    rospy.Subscriber("/camera/rgb/image_raw", Image, callback_image)
-    rospy.loginfo("waiting for topic: /camera/rgb/image_raw")
-    rospy.wait_for_message("/camera/rgb/image_raw", Image)
+    rospy.Subscriber("/camera/color/image_raw", Image, callback_image)
+    rospy.loginfo("waiting for topic: /camera/color/image_raw")
+    rospy.wait_for_message("/camera/color/image_raw", Image)
 
     # OpenVINO
+    rospy.loginfo("Loading models...")
     dnn_face = FaceDetection(device_name=_DEVICE_NAME)
     dnn_age_gender = AgeGenderRecognition(device_name=_DEVICE_NAME)
     dnn_emotions = EmotionsRecognition(device_name=_DEVICE_NAME)

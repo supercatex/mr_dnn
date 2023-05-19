@@ -22,6 +22,7 @@ class IntelPreTrainedModel(object):
                 models_dir = "~/models/openvino/"
 
         ie = Core()
+        ie.set_property({'CACHE_DIR': '/tmp/openvino_cache/'})
         name = model_name
         path = "%s/%s/%s/FP16/%s.xml" % (models_dir, model_group, name, name)
         net = ie.read_model(model=path)
@@ -317,6 +318,7 @@ class Yolov8():
         # self.model = cv2.dnn.readNetFromONNX(self.path)
 
         ie = Core()
+        ie.set_property({'CACHE_DIR': '/tmp/openvino_cache/'})
         name = model_name
         path = "%s/%s/%s/%s.xml" % (models_dir, "yolo", name, name)
         net = ie.read_model(model=path)
