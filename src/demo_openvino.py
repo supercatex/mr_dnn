@@ -17,12 +17,12 @@ if __name__ == "__main__":
     rospy.init_node("demo")
     rospy.loginfo("demo node start!")
 
-    _DEVICE_NAME = rospy.get_param("~device")
+    _DEVICE_NAME = rospy.get_param("~device", "CPU")
     _DNN_FACE = rospy.get_param("~dnn_face")
     _DNN_FACE_ATTRS = rospy.get_param("~dnn_face_attrs")
     _DNN_POSE = rospy.get_param("~dnn_pose")
     _DNN_YOLO = rospy.get_param("~dnn_yolo")
-    _DEVICE_NAME = "CPU"
+    # _DEVICE_NAME = "CPU"
     rospy.loginfo("Using %s device." % _DEVICE_NAME)
 
     # ROS Topics
