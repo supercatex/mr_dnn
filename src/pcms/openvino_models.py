@@ -7,8 +7,8 @@ from torch import embedding
 from pcms.openpose_decoder import OpenPoseDecoder
 from scipy.spatial import distance
 import os
-from ultralytics.yolo.utils import ROOT, yaml_load
-from ultralytics.yolo.utils.checks import check_yaml
+from ultralytics.data.utils import ROOT, yaml_load
+from ultralytics.utils.checks import check_yaml
 from pcms.openvino_yolov8 import *
 from ultralytics import YOLO
 
